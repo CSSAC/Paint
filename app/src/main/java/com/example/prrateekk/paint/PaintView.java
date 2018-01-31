@@ -38,6 +38,7 @@ public class PaintView extends View {
     private Canvas mCanvas;
     private Paint mBitmapPaint = new Paint(Paint.DITHER_FLAG);
     private int height, width;
+    public int outside;
 
     public PaintView(Context context) {
         super(context);
@@ -79,6 +80,7 @@ public class PaintView extends View {
     protected void onDraw(Canvas canvas) {
         canvas.save();
         mCanvas.drawColor(backgroundColor);
+        mCanvas.drawCircle(width/2, height/2, width/4, mPaint);
 
         for (FingerPath fp : paths) {
             mPaint.setColor(fp.getColor());
@@ -101,9 +103,19 @@ public class PaintView extends View {
         mY = y;
     }
 
+    public boolean isOutside(float x, float y) {
+        float cx = width/2, cy = height/2, rd = width/4;
+        if ((x-cx)*(x-cx)+(y-cy)*(y-cy)-rd*rd>0) return true;
+        else return false;
+    }
+
     private void touchMove(float x, float y) {
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
+        if (isOutside(x, y)){
+            outside++;
+        }
+        System.out.println(outside);
 
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
             mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
@@ -135,7 +147,6 @@ public class PaintView extends View {
                 invalidate();
                 break;
         }
-
         return true;
     }
 }
